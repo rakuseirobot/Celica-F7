@@ -66,8 +66,8 @@ Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_spi.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_spi_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.c \
-Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.c \ \
-Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart_ex.c
+Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart.c \
+Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_uart_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash.c \
