@@ -133,27 +133,29 @@ void Log_demo(void)
 
   /* Show Header and Footer texts */
   LCD_LOG_SetHeader((uint8_t *)"GY-955");
-
-  uint8_t txBuffer = 0x00;
-  HAL_I2C_Mem_Write(&hi2c1, (uint16_t)0x28, 0x3E, I2C_MEMADD_SIZE_8BIT, &txBuffer, 1, 1000);
-
-  txBuffer = 0x0C;
-  HAL_I2C_Mem_Write(&hi2c1, (uint16_t)0x28, 0x3D, I2C_MEMADD_SIZE_8BIT, &txBuffer, 1, 1000);
-
-  HAL_Delay(6);
-
-  uint8_t return_value = 0;
-  HAL_I2C_Mem_Read(&hi2c1,(uint16_t)0x28,0x20, I2C_MEMADD_SIZE_8BIT, &return_value,1,1000);
-  LCD_UsrLog ("0x20 : %d \n", return_value);
-  HAL_Delay(4000);
-
-  /* Clear Old logs */
-  LCD_LOG_ClearTextZone();
-
-  /* Output new user logs */
-  for (i = 0; i < 10; i++)
-  {
-    LCD_UsrLog ("This is Line %d \n", i);
+  
+  uint8_t pData[1] = {0x00};
+  HAL_I2C_Mem_Write(&hi2c1,0x29<<1,0x3e,1,pData,1,1000);
+  pData[0] = 0x0C;
+  HAL_I2C_Mem_Write(&hi2c1,0x29<<1,0x3d,1,pData,1,1000);
+  
+  while(1){
+    uint8_t aData[1];
+    HAL_I2C_Mem_Read(&hi2c1,0x29<<1,0x22,1,aData,2,1000);
+    uint8_t aData1[1];
+    HAL_I2C_Mem_Read(&hi2c1,0x29<<1,0x23,1,aData1,2,1000);
+    
+    uint8_t tmp = aData[0]*256+aData1[0];
+    int x=0;
+    if(tmp>=0&&tmp<32768){
+      x=tmp/10000;
+    }else{
+      x=(tmp-65536)/10000;
+    }
+    LCD_UsrLog ("X : %d \n",x);
+    HAL_Delay(100);
+    /* Clear Old logs */
+    LCD_LOG_ClearTextZone();
   }
   
 }
