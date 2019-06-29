@@ -52,12 +52,9 @@ DMA2D_HandleTypeDef hdma2d;
 
 DSI_HandleTypeDef hdsi;
 
-ETH_HandleTypeDef heth;
-
 CEC_HandleTypeDef hcec;
 
 I2C_HandleTypeDef hi2c1;
-I2C_HandleTypeDef hi2c4;
 
 LTDC_HandleTypeDef hltdc;
 
@@ -99,11 +96,9 @@ static void MX_ADC3_Init(void);
 static void MX_CRC_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_DSIHOST_DSI_Init(void);
-static void MX_ETH_Init(void);
 static void MX_FMC_Init(void);
 static void MX_HDMI_CEC_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_I2C4_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_QUADSPI_Init(void);
 static void MX_RTC_Init(void);
@@ -119,7 +114,6 @@ static void MX_TIM12_Init(void);
 static void MX_UART5_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART6_UART_Init(void);
-static void MX_GFXSIMULATOR_Init(void);
 void StartDefaultTask(void const * argument);
 void StartLchikaTask(void const * argument);
 
@@ -138,7 +132,7 @@ void Log_demo(void)
   LCD_LOG_Init();
 
   /* Show Header and Footer texts */
-  LCD_LOG_SetHeader((uint8_t *)"Log Example");
+  LCD_LOG_SetHeader((uint8_t *)"GY-955");
 
   /* Output User logs */
   for (i = 0; i < 10; i++)
@@ -170,6 +164,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
+  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -194,11 +189,9 @@ int main(void)
   MX_CRC_Init();
   MX_DMA2D_Init();
   MX_DSIHOST_DSI_Init();
-  //MX_ETH_Init();
   MX_FMC_Init();
   MX_HDMI_CEC_Init();
   MX_I2C1_Init();
-  MX_I2C4_Init();
   MX_LTDC_Init();
   MX_QUADSPI_Init();
   MX_RTC_Init();
@@ -214,8 +207,6 @@ int main(void)
   MX_UART5_Init();
   MX_USART1_UART_Init();
   MX_USART6_UART_Init();
-  MX_GFXSIMULATOR_Init();
-
   /* USER CODE BEGIN 2 */
   BSP_LED_Init(LED1);
   BSP_SDRAM_Init();
@@ -268,8 +259,8 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  //osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  //defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of LchikaTask */
   osThreadDef(LchikaTask, StartLchikaTask, osPriorityNormal, 0, 128);
@@ -355,8 +346,7 @@ void SystemClock_Config(void)
                               |RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
                               |RCC_PERIPHCLK_USART6|RCC_PERIPHCLK_UART5
                               |RCC_PERIPHCLK_SAI1|RCC_PERIPHCLK_SAI2
-                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_I2C4
-                              |RCC_PERIPHCLK_CEC;
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_CEC;
   PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
   PeriphClkInitStruct.PLLI2S.PLLI2SP = RCC_PLLP_DIV2;
   PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
@@ -375,7 +365,6 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.Uart5ClockSelection = RCC_UART5CLKSOURCE_PCLK1;
   PeriphClkInitStruct.Usart6ClockSelection = RCC_USART6CLKSOURCE_PCLK2;
   PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_PCLK1;
   PeriphClkInitStruct.CecClockSelection = RCC_CECCLKSOURCE_HSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -663,72 +652,6 @@ static void MX_DSIHOST_DSI_Init(void)
 }
 
 /**
-  * @brief ETH Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ETH_Init(void)
-{
-
-  /* USER CODE BEGIN ETH_Init 0 */
-
-  /* USER CODE END ETH_Init 0 */
-
-   uint8_t MACAddr[6] ;
-
-  /* USER CODE BEGIN ETH_Init 1 */
-
-  /* USER CODE END ETH_Init 1 */
-  heth.Instance = ETH;
-  heth.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
-  heth.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
-  MACAddr[0] = 0x00;
-  MACAddr[1] = 0x80;
-  MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
-  heth.Init.MACAddr = &MACAddr[0];
-  heth.Init.RxMode = ETH_RXPOLLING_MODE;
-  heth.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
-  heth.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
-
-  /* USER CODE BEGIN MACADDRESS */
-    
-  /* USER CODE END MACADDRESS */
-
-  if (HAL_ETH_Init(&heth) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN ETH_Init 2 */
-
-  /* USER CODE END ETH_Init 2 */
-
-}
-
-/**
-  * @brief GFXSIMULATOR Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GFXSIMULATOR_Init(void)
-{
-
-  /* USER CODE BEGIN GFXSIMULATOR_Init 0 */
-
-  /* USER CODE END GFXSIMULATOR_Init 0 */
-
-  /* USER CODE BEGIN GFXSIMULATOR_Init 1 */
-
-  /* USER CODE END GFXSIMULATOR_Init 1 */
-  /* USER CODE BEGIN GFXSIMULATOR_Init 2 */
-
-  /* USER CODE END GFXSIMULATOR_Init 2 */
-
-}
-
-/**
   * @brief HDMI_CEC Initialization Function
   * @param None
   * @retval None
@@ -807,52 +730,6 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
-
-}
-
-/**
-  * @brief I2C4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C4_Init(void)
-{
-
-  /* USER CODE BEGIN I2C4_Init 0 */
-
-  /* USER CODE END I2C4_Init 0 */
-
-  /* USER CODE BEGIN I2C4_Init 1 */
-
-  /* USER CODE END I2C4_Init 1 */
-  hi2c4.Instance = I2C4;
-  hi2c4.Init.Timing = 0x20404768;
-  hi2c4.Init.OwnAddress1 = 0;
-  hi2c4.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c4.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c4.Init.OwnAddress2 = 0;
-  hi2c4.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c4.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c4.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Analogue filter 
-  */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c4, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Digital filter 
-  */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c4, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C4_Init 2 */
-
-  /* USER CODE END I2C4_Init 2 */
 
 }
 
@@ -1005,7 +882,6 @@ static void MX_RTC_Init(void)
   sDate.Month = RTC_MONTH_JANUARY;
   sDate.Date = 0x1;
   sDate.Year = 0x0;
-
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
@@ -1552,7 +1428,16 @@ static void MX_USART6_UART_Init(void)
 /* FMC initialization function */
 static void MX_FMC_Init(void)
 {
-  FMC_SDRAM_TimingTypeDef SdramTiming;
+
+  /* USER CODE BEGIN FMC_Init 0 */
+
+  /* USER CODE END FMC_Init 0 */
+
+  FMC_SDRAM_TimingTypeDef SdramTiming = {0};
+
+  /* USER CODE BEGIN FMC_Init 1 */
+
+  /* USER CODE END FMC_Init 1 */
 
   /** Perform the SDRAM1 memory initialization sequence
   */
@@ -1582,6 +1467,9 @@ static void MX_FMC_Init(void)
     Error_Handler( );
   }
 
+  /* USER CODE BEGIN FMC_Init 2 */
+
+  /* USER CODE END FMC_Init 2 */
 }
 
 /**
@@ -1609,6 +1497,14 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13|DSI_RESET_Pin|GPIO_PIN_5, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : RMII_TXD1_Pin RMII_TXD0_Pin RMII_TX_EN_Pin */
+  GPIO_InitStruct.Pin = RMII_TXD1_Pin|RMII_TXD0_Pin|RMII_TX_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
   /*Configure GPIO pins : ULPI_D7_Pin ULPI_D6_Pin ULPI_D5_Pin ULPI_D3_Pin 
                            ULPI_D2_Pin ULPI_D1_Pin ULPI_D4_Pin */
   GPIO_InitStruct.Pin = ULPI_D7_Pin|ULPI_D6_Pin|ULPI_D5_Pin|ULPI_D3_Pin 
@@ -1634,6 +1530,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF11_SDMMC2;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AUDIO_SDA_Pin */
+  GPIO_InitStruct.Pin = AUDIO_SDA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF11_I2C4;
+  HAL_GPIO_Init(AUDIO_SDA_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PJ13 DSI_RESET_Pin PJ5 */
   GPIO_InitStruct.Pin = GPIO_PIN_13|DSI_RESET_Pin|GPIO_PIN_5;
@@ -1738,6 +1642,30 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
   HAL_GPIO_Init(ULPI_STP_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : RMII_MDC_Pin RMII_RXD0_Pin RMII_RXD1_Pin */
+  GPIO_InitStruct.Pin = RMII_MDC_Pin|RMII_RXD0_Pin|RMII_RXD1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AUDIO_SCL_Pin */
+  GPIO_InitStruct.Pin = AUDIO_SCL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF4_I2C4;
+  HAL_GPIO_Init(AUDIO_SCL_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RMII_REF_CLK_Pin RMII_MDIO_Pin RMII_CRS_DV_Pin */
+  GPIO_InitStruct.Pin = RMII_REF_CLK_Pin|RMII_MDIO_Pin|RMII_CRS_DV_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : B_USER_Pin */
   GPIO_InitStruct.Pin = B_USER_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -1792,15 +1720,13 @@ void StartDefaultTask(void const * argument)
 /* USER CODE END Header_StartLchikaTask */
 void StartLchikaTask(void const * argument)
 {
-
+  /* USER CODE BEGIN StartLchikaTask */
   /* Infinite loop */
   for(;;)
   {
-    // 出力を反転
-    HAL_GPIO_TogglePin(GPIOJ, GPIO_PIN_5);  // 要 "stm32fXxx_hal.h"
-    // 500ms待機
-    osDelay(500);
+    osDelay(1);
   }
+  /* USER CODE END StartLchikaTask */
 }
 
 /**
