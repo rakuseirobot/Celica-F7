@@ -134,13 +134,18 @@ void Log_demo(void)
   /* Show Header and Footer texts */
   LCD_LOG_SetHeader((uint8_t *)"GY-955");
 
-  /* Output User logs */
-  for (i = 0; i < 10; i++)
-  {
-    LCD_UsrLog ("This is Line %d \n", i);
-  }
+  uint8_t txBuffer = 0x00;
+  HAL_I2C_Mem_Write(&hi2c1, (uint16_t)0x28, 0x3E, I2C_MEMADD_SIZE_8BIT, &txBuffer, 1, 1000);
 
-  HAL_Delay(500);
+  txBuffer = 0x0C;
+  HAL_I2C_Mem_Write(&hi2c1, (uint16_t)0x28, 0x3D, I2C_MEMADD_SIZE_8BIT, &txBuffer, 1, 1000);
+
+  HAL_Delay(6);
+
+  uint8_t return_value = 0;
+  HAL_I2C_Mem_Read(&hi2c1,(uint16_t)0x28,0x20, I2C_MEMADD_SIZE_8BIT, &return_value,1,1000);
+  LCD_UsrLog ("0x20 : %d \n", return_value);
+  HAL_Delay(4000);
 
   /* Clear Old logs */
   LCD_LOG_ClearTextZone();
